@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * Implementation of hook_init().
+ */
+function settings_audit_log_init() {
+  settings_audit_log_set_connection_id();
+}
+
+/**
+ * Set the connection id for the current request.
+ */
+function settings_audit_log_set_connection_id() {
+  global $user;
+  switch (db_driver()) {
+    case 'pgsql':
+      $connection_id = db_query('SELECT to_hex(EXTRACT(EPOCH FROM backend_start)::integer) || \'.\' || to_hex(procpid) FROM pg_stat_activity WHERE procpid = pg_backend_pid()')->fetchField();
+      $key = array('uid' => $user->uid, 'connection_id' => $connection_id);
+      $fields = array_merge($key, array('log_timestamp' => REQUEST_TIME));
+      db_merge('settings_audit_log_user_db_connection')->key($key)->fields($fields)->execute();
+        break;
+
+    case 'mysqli':
+    case 'mysql':
+      $connection_id = db_query('SELECT connection_id()')->fetchField();
+      $key = array('uid' => $user->uid, 'connection_id' => $connection_id);
+      $fields = array_merge($key, array('log_timestamp' => REQUEST_TIME));
+      db_merge('settings_audit_log_user_db_connection')->key($key)->fields($fields)->execute();
+        break;
+  }
+}
+
+/**
+ * Implementation of hook_cron().
+ */
+function settings_audit_log_cron() {
+  settings_audit_log_clean_user_db_connection_table();
+}
+
+/**
+ * Clean out old rows from {settings_audit_log_user_db_connection}.
+ */
+function settings_audit_log_clean_user_db_connection_table() {
+  db_delete('settings_audit_log_user_db_connection')
+    ->condition('log_timestamp', REQUEST_TIME - variable_get('settings_audit_log_user_db_connection_ttl', 3600), '<')
+    ->execute();
+}
+
