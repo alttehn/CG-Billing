@@ -333,7 +333,7 @@ $databases = array (
     ),
   ),
 );
-
+$conf['nodejs_service_key']='tufyufghbuhoiuo';
 /**
  * Access control for update.php script.
  *
