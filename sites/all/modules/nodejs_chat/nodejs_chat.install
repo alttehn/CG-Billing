@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the nodejs_chat module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function nodejs_chat_schema() {
+  return array(
+    'nodejs_chat_channels' => array(
+      'description' => 'List of existing chat channels on the node.js server.',
+      'fields' => array(
+        'channel' => array(
+          'description' => 'The ID (channel name used in the node.js server) of the Chat channel.',
+          'type' => 'varchar',
+          'not null' => TRUE,
+          'length' => 64,
+        ),
+        'users' => array(
+          'description' => 'A serialized array with the list of current users (UIDs) able to access the channel.',
+          'type' => 'blob',
+          'size' => 'normal',
+          'not null' => FALSE,
+          'serialize' => TRUE,
+          'length' => 64,
+        ),
+        'settings' => array(
+          'type' => 'blob',
+          'not null' => FALSE,
+          'size' => 'normal',
+          'serialize' => TRUE,
+          'description' => 'A serialized array of settings that can be used in the chat.',
+        ),
+      ),
+      'primary key' => array('channel'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function nodejs_chat_uninstall() {
+  // Remove custom variables.
+  variable_del('nodejs_chat_message_transmission');
+  variable_del('nodejs_chat_title');
+}
+
+/**
+ * Install nodejs_chat_channels schema.
+ */
+function nodejs_update_7001() {
+  drupal_install_schema('nodejs_chat');
+}

@@ -1,0 +1,13 @@
+name = NodeJS Chat
+description = Simple chat using NodeJS on the backend.
+core = 7.x
+dependencies[] = nodejs
+
+files[] = includes/Chat.inc
+files[] = theme/theme.inc
+; Information added by Drupal.org packaging script on 2015-04-18
+version = "7.x-1.0+10-dev"
+core = "7.x"
+project = "nodejs_chat"
+datestamp = "1429376282"
+
